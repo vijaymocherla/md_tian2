@@ -1,10 +1,27 @@
 # md_tian2
 
-`md_tian2` (Molecular Dynamics Tian Xia 2, acronym: MDT2) is a program for simulating the scattering of atoms (and molecules) from a surface.
-
-Do molecular dynamics, Langevin dynamics, Ring Polymer dynamics
+`md_tian2` (Molecular Dynamics Tian Xia 2, acronym: MDT2) is a program for simulating the scattering of atoms and molecules from a surfaces.
 
 Source code is in Fortran.
+
+## Methods
+
+### Dynamics methods
+- Classical Molecular Dynamics
+- Langevin dynamics
+- Ring Polymer dynamics  
+Propagators 
+  - Standard Velocity Verlet
+  - Andersen Thermostat 
+  - Path Integral Langevin Equation (PILE) thermostat
+
+### Potentials
+- Effective Medium Theory (EMT)
+- Lennard-Jones Potential (LJ)
+- Harmonic Oscillator
+- Neural Network PES with interface to RuNNer (nene).
+- Reactive Empirical Bond Order (REBO)
+
 
 ## List of modules
 
@@ -30,7 +47,8 @@ Source code is in Fortran.
 - `useful_things.f90` useful math routines
 
 
-
+## Installation
+To compile the code, you need a Fortran compiler. The compiler options can be set in the `Makefile` in `src`, which can be used to compile the entire code base. The code has been tested with the Intel Fortran compiler (`ifort`) and the GNU Fortran compiler (`gfortran`). 
 
 ## Input files
   - `md_tian.inp`	        :control parameters defining the simulation conditions
@@ -67,12 +85,12 @@ Angle    : radian = 180 deg
 Distance : bohr = 0.5291772 Angstroem
 ```
 
-The first working and tested version is put together February 18, 2014
-on a Fassberg Hill in Dynamics at Surfaces Dep. of MPIBPC to the flaming storm of applause muffled by thick institute building walls.
+<!-- The first working and tested version is put together February 18, 2014
+on a Fassberg Hill in Dynamics at Surfaces Dep. of MPIBPC to the flaming storm of applause muffled by thick institute building walls. -->
 
 ## Credits:
 
-Contributors : Daniel J. Auerbach; Svenja Maria Janke; Marvin Kammler; Sascha Kandratsenka; Sebastian Wille
+**Contributors** : Daniel J. Auerbach, Svenja Maria Janke, Marvin Kammler, Sascha Kandratsenka and Sebastian Wille
 
 ```
 Dynamics at Surfaces Dep.
@@ -96,9 +114,9 @@ Germany
 
 - List of keywords for md_tian.inp:
   - `run` defines whether to
-    1. minimize a structure using fire algorithm (min)
-	2. in case of the REBO potential, one can fit the parameters (fit) (check md_tian2.f90)
-	3. perform molecular dynamics simulations (md)
+    - `min` minimize a structure using fire algorithm
+    - `fit` for the REBO potential, one can fit the parameters (check md_tian2.f90)
+  	- `md` perform molecular dynamics simulations.
   - `start`: gives the number of trajectory to start with (we use this number to feed the RNG, therefore if one wants to recalculate a trajectory, the number can be given here; also useful to split large jobs
   - `ntrajs`: total number of trajectories
   - `nsteps`: maximum number of steps for the simulation (this prevents infinite simulation time in case of adsorption, because there is no stopping criterion compared to scattering)
