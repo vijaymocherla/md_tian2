@@ -11,20 +11,16 @@ enable_language(CXX)
 option(INTEL "compile with ifort and mkl" OFF)
 option(OPENMP "compile with openmp support" OFF)
 option(DEBUG "compile with debug flags" OFF)
-option(MACE "compile with mace interface" OFF)
-set(CMAKE_PREFIX_PATH ${CONDA_PREFIX})
-
-option(INTEL "compile with ifort and mkl" OFF)
-option(OPENMP "compile with openmp support" OFF)
-option(DEBUG "compile with debug flags" OFF)
 
 find_package(MPI REQUIRED)
+find_package(mace REQUIRED)
+set(CMAKE_PREFIX_PATH ${CONDA_PREFIX})
 
-# if(INTEL)
-#     set(CMAKE_Fortran_COMPILER ifx)
-# else()
-#     set(CMAKE_Fortran_COMPILER gfortran)
-# endif()
+if(INTEL)
+    set(CMAKE_Fortran_COMPILER ifx)
+else()
+    set(CMAKE_Fortran_COMPILER gfortran)
+endif()
 
 if(INTEL)
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -flto -lstdc++")
@@ -117,7 +113,7 @@ set(MODULES
     src/rpmd.f90
     src/useful_things.f90
     src/open_file.f90
-    # src/pes_mace_mod.f90
+    src/pes_mace_mod.f90
     src/run_config.f90
     src/RuNNer_src/fileunits.f90 
     src/RuNNer_src/predictionoptions.f90 
@@ -140,7 +136,8 @@ set(MODULES
 
 
 add_executable(md_tian2 ${SUBROUTINES} ${MODULES} ${libraries})
-target_link_libraries(md_tian2 ${libraries})
-
+target_include_directories(md_tian2 PRIVATE ${mace_INCLUDE_DIRS})
+target_link_libraries(md_tian2 ${libraries} PRIVATE mace)
+# Add MACE include directories to md_tian2
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)

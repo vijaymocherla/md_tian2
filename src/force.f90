@@ -28,7 +28,7 @@ module force
 
     use pes_lj_mod,   only : compute_lj, compute_simple_lj
     use pes_emt_mod,  only : compute_emt
-    ! use pes_mace_mod, only : compute_mace
+    use pes_mace_mod, only : compute_mace
     use pes_ho_mod,   only : compute_ho
     use pes_rebo_mod, only : compute_rebo
     use rpmd,         only : do_ring_polymer_step
@@ -81,7 +81,7 @@ contains
         if (any(atoms%pes == pes_id_ho))        call compute_ho       (atoms, flag)
         if (any(atoms%pes == pes_id_rebo))      call compute_rebo     (atoms, flag)
         if (any(atoms%pes == pes_id_nene))      call compute_nene     (atoms, flag)
-        ! if (any(atoms%pes == pes_id_mace))      call compute_mace     (atoms, flag)
+        if (any(atoms%pes == pes_id_mace))      call compute_mace     (atoms, flag)
 
         if (flag == energy_and_force) call set_acceleration(atoms)
 
