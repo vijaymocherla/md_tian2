@@ -36,6 +36,7 @@ module md_init
     use pes_non_mod,  only : read_non_interacting
     use pes_rebo_mod, only : read_rebo
     use pes_nene_mod, only : read_nene
+    ! use pes_mace_mod, only : read_mace
 
     implicit none
 
@@ -131,6 +132,9 @@ contains
 
                         case (pes_name_nene)
                             call read_nene(atoms, pes_unit)
+                        
+                        ! case (pes_name_mace)
+                        !     call read_mace(atoms, pes_unit)
 
                         case default
                             print *, err // "unknown potential in PES file:", words(2)

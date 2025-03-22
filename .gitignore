@@ -1,6 +1,7 @@
 # Codeblocks
 obj/
 bin/
+build/
 *.cbp
 *.depend
 *.layout

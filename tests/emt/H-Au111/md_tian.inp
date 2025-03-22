@@ -1,0 +1,25 @@
+run md
+
+start 1
+ntrajs 1
+nsteps 10
+step 1
+
+projectile 1 H 1.0 ver
+lattice 1 Au 196.0 ver
+
+Einc 1.92
+polar 50
+azimuth 0.0
+
+pip r r 6.0
+pul 6.1
+
+Tsurf 300
+Tproj 300
+
+pes '../pes_files/EMT-HAu.pes'
+
+conf poscar './H_Au111_3x3x4.POSCAR'
+
+output energy 1 vasp 10

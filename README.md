@@ -61,6 +61,17 @@ To compile the code, you need a Fortran compiler. The compiler options can be se
 ## Usage instructions
 Change the settings in the makefile to your need. Options:
 
+**Using CMake**
+```sh
+cd md_tian2
+mkdir build;
+cd build;
+cmake .. -DINTEL=ON
+make -jN
+```
+
+
+**Using GNU Make**
 ```sh
 make help 		# print possible arguments for make
 make serial		# serial version of md_tian2
