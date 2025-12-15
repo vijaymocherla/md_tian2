@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 
+# Set Fortran compiler before project declaration
+option(INTEL "compile with ifort and mkl" OFF)
+if(INTEL)
+    set(CMAKE_Fortran_COMPILER /opt/intel/oneapi/compiler/2025.1/bin/ifx)
+else()
+    set(CMAKE_Fortran_COMPILER gfortran)
+endif()
+
 # Project name and language
 project(md_tian2 VERSION 2.1
         DESCRIPTION "md_tian an MD code in Fortran for surface scattering"
@@ -10,40 +18,27 @@ enable_language(CXX)
 include(FetchContent)
 
 
-option(INTEL "compile with ifort and mkl" OFF)
 option(OPENMP "compile with openmp support" OFF)
 option(DEBUG "compile with debug flags" OFF)
 
 # Set CMAKE_PREFIX_PATH to conda environment before find_package calls
 set(CMAKE_PREFIX_PATH ${CONDA_PREFIX})
-# Set Torch directory explicitly for libmace as a cache variable
-set(Torch_DIR "${CONDA_PREFIX}/lib/python3.14/site-packages/torch/share/cmake/Torch" CACHE PATH "Path to TorchConfig.cmake")
-
+find_package(Torch REQUIRED)
 find_package(MPI REQUIRED)
 
 FetchContent_Declare(
         mace
-        GIT_REPOSITORY https://github.com/stenczelt/libmace.git
-        GIT_TAG v25.03.2
+        GIT_REPOSITORY https://github.com/vijaymocherla/libmace.git
+        GIT_TAG pre-release
         FIND_PACKAGE_ARGS      # make CMake try find_package(...) first
 )
 FetchContent_MakeAvailable(mace)
 
-message(STATUS MACE_FORTRAN_MODULE ${MACE_FORTRAN_MODULE})
-
-add_executable(mace_f90 main.f90 ${MACE_FORTRAN_MODULE})
-target_link_libraries(mace_f90 mace::mace)
-target_link_libraries(mace_f90 ${MPI_Fortran_LIBRARIES})
-target_include_directories(mace_f90 PRIVATE ${MPI_Fortran_INCLUDE_DIRS})
+message(STATUS "MACE_FORTRAN_MODULE ${MACE_FORTRAN_MODULE}")
+set(MACE_FORTRAN_MODULE "${CMAKE_CURRENT_BINARY_DIR}/_deps/mace-src/src/fortran/mace.f90")
 
 if(INTEL)
-    set(CMAKE_Fortran_COMPILER ifx)
-else()
-    set(CMAKE_Fortran_COMPILER gfortran)
-endif()
-
-if(INTEL)
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -flto -lstdc++")
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -lstdc++")
     if(DEBUG)
         set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O2 -qmkl -xHost -fp-model strict -check bounds -g -traceback") # -Ofast -ipo
     else()
@@ -155,9 +150,16 @@ set(MODULES
 
 
 
-add_executable(md_tian2 ${SUBROUTINES} ${MODULES} ${libraries})
-target_include_directories(md_tian2 PRIVATE ${mace_INCLUDE_DIRS})
-target_link_libraries(md_tian2 ${libraries} PRIVATE mace)
-# Add MACE include directories to md_tian2
+# libmace 
+# add_executable(mace_f90 ${MACE_FORTRAN_MODULE} ${CMAKE_CURRENT_BINARY_DIR}/_deps/mace-src/examples/main.f90)
+# set_target_properties(mace_f90 PROPERTIES LINKER_LANGUAGE Fortran)
+# target_link_libraries(mace_f90 mace::mace ${MPI_Fortran_LIBRARIES})
+# target_include_directories(mace_f90 ${MACE_FORTRAN_MODULE} PRIVATE ${MPI_Fortran_INCLUDE_DIRS})
+
+# mdtian2
+add_executable(md_tian2 ${SUBROUTINES} ${MODULES} ${MACE_FORTRAN_MODULE})
+set_target_properties(md_tian2 PROPERTIES LINKER_LANGUAGE Fortran)
+target_link_libraries(md_tian2 mace_f90 mace::mace ${MPI_Fortran_LIBRARIES} ${libraries} )
+target_include_directories(md_tian2 PRIVATE ${MPI_Fortran_INCLUDE_DIRS} mace_f90 ${MACE_FORTRAN_MODULE})
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
