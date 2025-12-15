@@ -14,6 +14,11 @@ option(INTEL "compile with ifort and mkl" OFF)
 option(OPENMP "compile with openmp support" OFF)
 option(DEBUG "compile with debug flags" OFF)
 
+# Set CMAKE_PREFIX_PATH to conda environment before find_package calls
+set(CMAKE_PREFIX_PATH ${CONDA_PREFIX})
+# Set Torch directory explicitly for libmace as a cache variable
+set(Torch_DIR "${CONDA_PREFIX}/lib/python3.14/site-packages/torch/share/cmake/Torch" CACHE PATH "Path to TorchConfig.cmake")
+
 find_package(MPI REQUIRED)
 
 FetchContent_Declare(
@@ -30,8 +35,6 @@ add_executable(mace_f90 main.f90 ${MACE_FORTRAN_MODULE})
 target_link_libraries(mace_f90 mace::mace)
 target_link_libraries(mace_f90 ${MPI_Fortran_LIBRARIES})
 target_include_directories(mace_f90 PRIVATE ${MPI_Fortran_INCLUDE_DIRS})
-
-set(CMAKE_PREFIX_PATH ${CONDA_PREFIX})
 
 if(INTEL)
     set(CMAKE_Fortran_COMPILER ifx)
