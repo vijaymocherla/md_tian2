@@ -7,13 +7,30 @@ project(md_tian2 VERSION 2.1
 
 enable_language(Fortran)
 enable_language(CXX)
+include(FetchContent)
+
 
 option(INTEL "compile with ifort and mkl" OFF)
 option(OPENMP "compile with openmp support" OFF)
 option(DEBUG "compile with debug flags" OFF)
 
 find_package(MPI REQUIRED)
-find_package(mace REQUIRED)
+
+FetchContent_Declare(
+        mace
+        GIT_REPOSITORY https://github.com/stenczelt/libmace.git
+        GIT_TAG v25.03.2
+        FIND_PACKAGE_ARGS      # make CMake try find_package(...) first
+)
+FetchContent_MakeAvailable(mace)
+
+message(STATUS MACE_FORTRAN_MODULE ${MACE_FORTRAN_MODULE})
+
+add_executable(mace_f90 main.f90 ${MACE_FORTRAN_MODULE})
+target_link_libraries(mace_f90 mace::mace)
+target_link_libraries(mace_f90 ${MPI_Fortran_LIBRARIES})
+target_include_directories(mace_f90 PRIVATE ${MPI_Fortran_INCLUDE_DIRS})
+
 set(CMAKE_PREFIX_PATH ${CONDA_PREFIX})
 
 if(INTEL)
