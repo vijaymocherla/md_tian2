@@ -11,13 +11,14 @@ module pes_mace_mod
     real(dp), dimension(6) :: virial
       ! MACE model
 
-    type emt_mace
+    type mace_pes
       private
       character(len = 256) :: model_path
-      !type(MaceModel) :: calc
-    end type emt_mace
+      integer, allocatable :: atomic_numbers(:)
+      type(MaceModel) :: calc
+    end type mace_pes
 
-    type(emt_mace) :: pes_mace
+    type(mace_pes) :: pes_mace
 
     ! pbc conditions are hard coded here
     contains 
@@ -30,14 +31,27 @@ module pes_mace_mod
       integer, intent(in) :: inp_unit
 
       integer :: nwords, ios = 0
+      integer :: i, j, natoms
       character(len=max_string_length) :: buffer
       character(len=max_string_length) :: words(100)
       integer  :: idx1, idx2, ntypes, param_counter
       character(len=*), parameter :: err = "Error in read_mace: "
-
+      ! set local variables
       ntypes = simparams%nprojectiles+simparams%nlattices
       pes_mace%model_path = default_string
+      natoms = atoms%natoms
 
+      if (.not. allocated(pes_mace%atomic_numbers)) then
+        allocate(pes_mace%atomic_numbers(natoms))
+      end if
+      ! get atomic numbers
+      do i=1, natoms
+          do j=1, 118
+              if (trim(atoms%name(i)) == trim(elements(j)%symbol)) then
+                  pes_mace%atomic_numbers(i) = elements(j)%atomic_number
+              end if
+          end do
+      end do
       ! line should read something like "H   H   proj    proj"
       read(inp_unit, '(A)', iostat=ios) buffer
       call split_string(buffer, words, nwords)
@@ -103,17 +117,17 @@ module pes_mace_mod
       real(dp), allocatable :: node_energy(:)
       real(dp):: virial(6)
       real(dp) :: total_energy
-      type(MaceModel) :: model
+      type(MaceModel) :: calc
       ! allocate node energy
       allocate(node_energy(atoms%natoms))
       ! pass the model path
       print *, "Calculating MACE forces"
       ! initialize the model
-      pes_mace%calc = MaceModel(adjustl(trim(pes_mace%model_path)))      
-      call pes_mace%calc%print()
-      call pes_mace%calc%calculate(.true., atoms%natoms, atoms%simbox, pbc, atoms%atomic_numbers, atoms%r, total_energy, node_energy, atoms%f, virial)
+      calc = MaceModel(adjustl(trim(pes_mace%model_path)))      
+      call calc%print()
+      call calc%calculate(.true., atoms%natoms, atoms%simbox, pbc, pes_mace%atomic_numbers, atoms%r, total_energy, node_energy, atoms%f, virial)
       atoms%epot = total_energy
-      call pes_mace%calc%deallocate()
+      call calc%deallocate()
       deallocate(node_energy)
     end subroutine compute_mace
 
