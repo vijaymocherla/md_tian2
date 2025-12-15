@@ -149,17 +149,10 @@ set(MODULES
 )
 
 
-
-# libmace 
-# add_executable(mace_f90 ${MACE_FORTRAN_MODULE} ${CMAKE_CURRENT_BINARY_DIR}/_deps/mace-src/examples/main.f90)
-# set_target_properties(mace_f90 PROPERTIES LINKER_LANGUAGE Fortran)
-# target_link_libraries(mace_f90 mace::mace ${MPI_Fortran_LIBRARIES})
-# target_include_directories(mace_f90 ${MACE_FORTRAN_MODULE} PRIVATE ${MPI_Fortran_INCLUDE_DIRS})
-
 # mdtian2
 add_executable(md_tian2 ${SUBROUTINES} ${MODULES} ${MACE_FORTRAN_MODULE})
 set_target_properties(md_tian2 PROPERTIES LINKER_LANGUAGE Fortran)
-target_link_libraries(md_tian2 mace_f90 mace::mace ${MPI_Fortran_LIBRARIES} ${libraries} )
-target_include_directories(md_tian2 PRIVATE ${MPI_Fortran_INCLUDE_DIRS} mace_f90 ${MACE_FORTRAN_MODULE})
+target_link_libraries(md_tian2 mace::mace ${MPI_Fortran_LIBRARIES} ${libraries})
+target_include_directories(md_tian2 PRIVATE ${MPI_Fortran_INCLUDE_DIRS})
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
